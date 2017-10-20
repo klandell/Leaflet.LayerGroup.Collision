@@ -1,4 +1,4 @@
-
+import rbush from 'rbush';
 
 var isMSIE8 = !('getComputedStyle' in window && typeof window.getComputedStyle === 'function')
 
@@ -10,7 +10,7 @@ function extensions(parentClass) { return {
 		this._visibleLayers = [];
 		this._staticLayers = [];
 		this._rbush = [];
-		this._cachedRelativeBoxes = [];		
+		this._cachedRelativeBoxes = [];
 		this._margin = options.margin || 0;
 		this._rbush = null;
 	},
@@ -85,8 +85,9 @@ function extensions(parentClass) { return {
 			parentClass.prototype.addLayer.call(this, layer);
 			var visible = true;
 // 			var htmlElement = layer._icon;
-			var box = this._getIconBox(layer._icon);
-			boxes = this._getRelativeBoxes(layer._icon.children, box);
+
+			var box = this._getIconBox(layer._tooltip._container);
+			boxes = this._getRelativeBoxes(layer._tooltip._container.children, box);
 			boxes.push(box);
 			this._cachedRelativeBoxes[layer._leaflet_id] = boxes;
 		}
@@ -234,4 +235,3 @@ L.featureGroup.collision = function (options) {
 L.geoJson.collision = function (options) {
 	return new L.GeoJSON.Collision(options || {});
 };
-

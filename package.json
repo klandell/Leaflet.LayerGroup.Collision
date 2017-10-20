@@ -18,6 +18,6 @@
   "homepage": "http://www.mazemap.com",
   "dependencies": {
     "leaflet": "^1.0.0-beta.2",
-    "rbush": "^1.4.2"
+    "rbush": "^1.4.3"
   }
 }
