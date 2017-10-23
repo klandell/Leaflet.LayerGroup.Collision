@@ -107,13 +107,7 @@ function extensions(parentClass) { return {
             }
 		}
 
-		if (!collision) {
-			if (!visible) {
-				parentClass.prototype.addLayer.call(this, layer);
-			}
-			this._visibleLayers.push(layer);
-			bush.load(boxes);
-		} else {
+        if (collision || collisionLayers.length) {
             let layersToRemove = [layer];
 
             if (this._collisionResolver) {
@@ -125,7 +119,13 @@ function extensions(parentClass) { return {
             layersToRemove.forEach((l) => {
 			    parentClass.prototype.removeLayer.call(this, l);
             });
-		}
+        } else {
+            if (!visible) {
+                parentClass.prototype.addLayer.call(this, layer);
+            }
+            this._visibleLayers.push(layer);
+            bush.load(boxes);
+        }
 	},
 
 
