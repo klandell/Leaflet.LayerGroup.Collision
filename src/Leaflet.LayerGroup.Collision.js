@@ -9,9 +9,9 @@ function extensions(parentClass) { return {
 		this._originalLayers = [];
 		this._visibleLayers = [];
 		this._staticLayers = [];
-		this._rbush = [];
 		this._cachedRelativeBoxes = [];
 		this._margin = options.margin || 0;
+        this._collisionResolver = options.collisionResolver;
 		this._rbush = null;
 	},
 
@@ -84,19 +84,27 @@ function extensions(parentClass) { return {
 			//   in order to fetch its position and size.
 			parentClass.prototype.addLayer.call(this, layer);
 			var visible = true;
-// 			var htmlElement = layer._icon;
 
-			var box = this._getIconBox(layer._tooltip._container);
+			var box = this._getTooltipBox(layer._tooltip._container);
 			boxes = this._getRelativeBoxes(layer._tooltip._container.children, box);
 			boxes.push(box);
 			this._cachedRelativeBoxes[layer._leaflet_id] = boxes;
 		}
 
-		boxes = this._positionBoxes(this._map.latLngToLayerPoint(layer.getLatLng()),boxes);
+		boxes = this._positionBoxes(this._map.latLngToLayerPoint(layer.getLatLng()), boxes, layer);
 
 		var collision = false;
-		for (var i=0; i<boxes.length && !collision; i++) {
+        var collisionLayers = [];
+		for (var i=0; i < boxes.length; i++) {
 			collision = bush.search(boxes[i]).length > 0;
+
+            if (collision) {
+                if (this._collisionResolver) {
+                    collisionLayers.push(boxes[i].layer);
+                } else {
+                    break;
+                }
+            }
 		}
 
 		if (!collision) {
@@ -106,14 +114,23 @@ function extensions(parentClass) { return {
 			this._visibleLayers.push(layer);
 			bush.load(boxes);
 		} else {
-			parentClass.prototype.removeLayer.call(this, layer);
+            let layersToRemove = [layer];
+
+            if (this._collisionResolver) {
+                const resolution = this._collisionResolver(layer, collisionLayers);
+                if (resolution) {
+                  layersToRemove = Array.isArray(resolution) ? resolution : [resolution];
+                }
+            }
+            layersToRemove.forEach((l) => {
+			    parentClass.prototype.removeLayer.call(this, l);
+            });
 		}
 	},
 
 
-	// Returns a plain array with the relative dimensions of a L.Icon, based
-	//   on the computed values from iconSize and iconAnchor.
-	_getIconBox: function (el) {
+	// Returns a plain array with the relative dimensions of an el
+	_getTooltipBox: function (el) {
 
 		if (isMSIE8) {
 			// Fallback for MSIE8, will most probably fail on edge cases
@@ -134,7 +151,7 @@ function extensions(parentClass) { return {
 	},
 
 
-	// Much like _getIconBox, but works for positioned HTML elements, based on offsetWidth/offsetHeight.
+	// Much like _getTooltipBox, but works for positioned HTML elements, based on offsetWidth/offsetHeight.
 	_getRelativeBoxes: function(els,baseBox) {
 		var boxes = [];
 		for (var i=0; i<els.length; i++) {
@@ -172,22 +189,22 @@ function extensions(parentClass) { return {
 	},
 
 	// Adds the coordinate of the layer (in pixels / map canvas units) to each box coordinate.
-	_positionBoxes: function(offset, boxes) {
+	_positionBoxes: function(offset, boxes, layer) {
 		var newBoxes = [];	// Must be careful to not overwrite references to the original ones.
 		for (var i=0; i<boxes.length; i++) {
-			newBoxes.push( this._positionBox( offset, boxes[i] ) );
+			newBoxes.push( this._positionBox( offset, boxes[i], layer ) );
 		}
 		return newBoxes;
 	},
 
-	_positionBox: function(offset, box) {
-
-		return [
-			box[0] + offset.x - this._margin,
-			box[1] + offset.y - this._margin,
-			box[2] + offset.x + this._margin,
-			box[3] + offset.y + this._margin,
-		]
+	_positionBox: function(offset, box, layer) {
+		return {
+			minX: box[0] + offset.x - this._margin,
+			minY: box[1] + offset.y - this._margin,
+			maxX: box[2] + offset.x + this._margin,
+			maxY: box[3] + offset.y + this._margin,
+            layer,
+		};
 	},
 
 	_onZoomEnd: function() {

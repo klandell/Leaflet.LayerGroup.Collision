@@ -1,6 +1,13 @@
 Leaflet.LayerGroup.Collision
 ================================
 
+# FORK OF MAIN REPO #
+Changes
+* Detect collisions for tooltips instead of divIcons
+* Update rbush dependency
+* Add an option for a collisionResolver function, has two parameters, the current layer and the layers of which the current layer collides.  Return an array of layers from this function with your choice of the layers to hide.
+
+# REST OF ORIGINAL README #
 Provides basic collision detection in order to declutter large or overlapping sets of Leaflet markers.
 
 Don't like READMEs? Then see http://mazemap.github.io/Leaflet.LayerGroup.Collision/demo/demo.html
