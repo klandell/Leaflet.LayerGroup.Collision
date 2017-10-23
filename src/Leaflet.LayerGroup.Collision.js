@@ -16,7 +16,7 @@ function extensions(parentClass) { return {
 	},
 
 	addLayer: function(layer) {
-		if ( !('options' in layer) || !('icon' in layer.options)) {
+		if ( !layer._tooltip) {
 			this._staticLayers.push(layer);
 			parentClass.prototype.addLayer.call(this, layer);
 			return;
@@ -94,20 +94,26 @@ function extensions(parentClass) { return {
 		boxes = this._positionBoxes(this._map.latLngToLayerPoint(layer.getLatLng()), boxes, layer);
 
 		var collision = false;
-        var collisionLayers = [];
-		for (var i=0; i < boxes.length; i++) {
-			collision = bush.search(boxes[i]).length > 0;
+        var collisionLayers = new Set();
 
+        for (var i=0; i < boxes.length; i++) {
+			const collisions = bush.search(boxes[i]);
+
+            collision = !!collisions.length;
             if (collision) {
                 if (this._collisionResolver) {
-                    collisionLayers.push(boxes[i].layer);
+                    collisions.forEach((c) => {
+                      if (!collisionLayers.has(c.layer)) {
+                          collisionLayers.add(c.layer);
+                      }
+                    });
                 } else {
                     break;
                 }
             }
 		}
 
-        if (collision || collisionLayers.length) {
+        if (collision || collisionLayers.size) {
             let layersToRemove = [layer];
 
             if (this._collisionResolver) {
