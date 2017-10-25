@@ -1,6 +1,13 @@
 Leaflet.LayerGroup.Collision
 ================================
 
+Disclaimer
+--------
+
+THIS IS A FORK OF THE MAIN REPO TO ALLOW THE PLUGIN TO WORK WITH TOOLTIPS INSTEAD.
+
+
+--------
 Provides basic collision detection in order to declutter large or overlapping sets of Leaflet markers.
 
 Don't like READMEs? Then see http://mazemap.github.io/Leaflet.LayerGroup.Collision/demo/demo.html
