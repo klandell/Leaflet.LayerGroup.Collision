@@ -1,6 +1,6 @@
 {
   "name": "leaflet.layergroup.collision-tooltip",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "authors": [
     "Iván Sánchez Ortega <ivan@mazemap.no>"
   ],
@@ -17,7 +17,7 @@
   "license": "MIT",
   "homepage": "http://www.mazemap.com",
   "dependencies": {
-    "leaflet": "^1.0.0-beta.2",
-    "rbush": "^1.4.3"
+    "leaflet": "^1.2.0",
+    "rbush": "^2.0.1"
   }
 }

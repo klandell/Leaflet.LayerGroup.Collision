@@ -16,16 +16,15 @@ function extensions(parentClass) { return {
 	},
 
 	addLayer: function(layer) {
-		if ( !('options' in layer) || !('icon' in layer.options)) {
-			this._staticLayers.push(layer);
+		if (layer._tooltip && layer._tooltip._container) {
+            this._originalLayers.push(layer);
+            if (this._map) {
+                this._maybeAddLayerToRBush( layer );
+            }
+        } else {
+            this._staticLayers.push(layer);
 			parentClass.prototype.addLayer.call(this, layer);
-			return;
-		}
-
-		this._originalLayers.push(layer);
-		if (this._map) {
-			this._maybeAddLayerToRBush( layer );
-		}
+        }
 	},
 
 	removeLayer: function(layer) {
@@ -84,9 +83,8 @@ function extensions(parentClass) { return {
 			//   in order to fetch its position and size.
 			parentClass.prototype.addLayer.call(this, layer);
 			var visible = true;
-// 			var htmlElement = layer._icon;
 
-			var box = this._getIconBox(layer._tooltip._container);
+			var box = this._getTooltipBox(layer._tooltip._container);
 			boxes = this._getRelativeBoxes(layer._tooltip._container.children, box);
 			boxes.push(box);
 			this._cachedRelativeBoxes[layer._leaflet_id] = boxes;
@@ -111,9 +109,8 @@ function extensions(parentClass) { return {
 	},
 
 
-	// Returns a plain array with the relative dimensions of a L.Icon, based
-	//   on the computed values from iconSize and iconAnchor.
-	_getIconBox: function (el) {
+	// Returns a plain array with the relative dimensions of an L.tooltip
+	_getTooltipBox: function (el) {
 
 		if (isMSIE8) {
 			// Fallback for MSIE8, will most probably fail on edge cases
@@ -134,7 +131,7 @@ function extensions(parentClass) { return {
 	},
 
 
-	// Much like _getIconBox, but works for positioned HTML elements, based on offsetWidth/offsetHeight.
+	// Much like _getTooltipBox, but works for positioned HTML elements, based on offsetWidth/offsetHeight.
 	_getRelativeBoxes: function(els,baseBox) {
 		var boxes = [];
 		for (var i=0; i<els.length; i++) {
@@ -181,13 +178,12 @@ function extensions(parentClass) { return {
 	},
 
 	_positionBox: function(offset, box) {
-
-		return [
-			box[0] + offset.x - this._margin,
-			box[1] + offset.y - this._margin,
-			box[2] + offset.x + this._margin,
-			box[3] + offset.y + this._margin,
-		]
+		return {
+			minX: box[0] + offset.x - this._margin,
+			minY: box[1] + offset.y - this._margin,
+			maxX: box[2] + offset.x + this._margin,
+			maxY: box[3] + offset.y + this._margin,
+		};
 	},
 
 	_onZoomEnd: function() {

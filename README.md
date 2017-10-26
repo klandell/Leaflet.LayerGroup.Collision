@@ -4,7 +4,9 @@ Leaflet.LayerGroup.Collision
 Disclaimer
 --------
 
-THIS IS A FORK OF THE MAIN REPO TO ALLOW THE PLUGIN TO WORK WITH TOOLTIPS INSTEAD.
+THIS IS A FORK OF THE MAIN REPO TO ALLOW THE PLUGIN TO WORK WITH TOOLTIPS INSTEAD OF DIVICONS.  
+The dependencies have been updated, and rbush is imported directly in the module.  Other than that
+the code is largely unchanged.  However, use with care.
 
 
 --------
